@@ -1,0 +1,26 @@
+{
+  "name": "socket.io-mongodb",
+  "version": "1.0.0",
+  "description": "A MongoDB Adapter for socket.io",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/losandes/socket.io-mongodb.git"
+  },
+  "keywords": [
+    "socket.io",
+    "adapter",
+    "mongo",
+    "mongodb",
+    "backplane"
+  ],
+  "author": "Andy Wright <andes.collab@gmail.com> (https://github.com/losandes)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/losandes/socket.io-mongodb/issues"
+  },
+  "homepage": "https://github.com/losandes/socket.io-mongodb#readme"
+}
