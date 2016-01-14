@@ -22,5 +22,14 @@
   "bugs": {
     "url": "https://github.com/losandes/socket.io-mongodb/issues"
   },
-  "homepage": "https://github.com/losandes/socket.io-mongodb#readme"
+  "homepage": "https://github.com/losandes/socket.io-mongodb#readme",
+  "dependencies": {
+    "async": "^1.5.2",
+    "debug": "^2.2.0",
+    "mongodb-uri": "^0.9.7",
+    "msgpack-js": "^0.3.0",
+    "mubsub": "^1.1.2",
+    "socket.io-adapter": "^0.4.0",
+    "uid2": "0.0.3"
+  }
 }
