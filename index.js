@@ -6,6 +6,7 @@ var uid2 = require('uid2'),
     mongodbUri = require('mongodb-uri'),
     async = require('async');
 
+console.log('Adapter', Adapter);
 //options blueprint
 // {
 //     uri: @string or @object
@@ -49,7 +50,7 @@ module.exports = function (uri, options) {
     }
 
     options.collectionName = options.collectionName || 'socket-io';
-    options.key = options.key || '';
+    options.key = options.key || 'socket-io';
 
     if (typeof options.uri === 'string') {
         connxStr = options.uri;
@@ -97,7 +98,7 @@ module.exports = function (uri, options) {
     /**
     // MongoAdapter inherits Adapter
     */
-    MongoAdapter.prototype = Adaptar.prototype;
+    MongoAdapter.prototype.__proto__ = Adapter.prototype;
 
     /**
     // Subscriber callback is called when a new message is inserted into the collection
@@ -135,7 +136,7 @@ module.exports = function (uri, options) {
         Adapter.prototype.broadcast.call(self, packet, opts);
 
         if (!remote) {
-            channel.publish(key, { uid: serverId, data: msgpack.encode([packet, opts]) });
+            channel.publish(options.key, { uid: serverId, data: msgpack.encode([packet, opts]) });
         }
     };
 
