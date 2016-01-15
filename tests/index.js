@@ -4,7 +4,8 @@ var http = require('http').Server,
     chaiBdd = require('chai'),
     expect = chaiBdd.expect,
     mubsub = require('mubsub'),
+    async = require('async'),
     adapter = require('../index.js'),
     fixture01 = require('./socketio-mongodb.fixture.js');
 
-fixture01(http, io, socketioClient, expect, mubsub, adapter);
+fixture01(http, io, socketioClient, expect, mubsub, adapter, async);
