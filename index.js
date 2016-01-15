@@ -26,7 +26,6 @@ console.log('Adapter', Adapter);
     // }
 //      client: (mubsub client)
 //      mongodbDriver: (an existing native mongodb driver)
-//      collectionName: (the name of the collection the packets will be stored in)
 //      key: (the prefix to be used when creating rooms)
 //      mubsubOptions: (mubsub passthru)
 //}
@@ -49,12 +48,14 @@ module.exports = function (uri, options) {
         options.uri = uri;
     }
 
-    options.collectionName = options.collectionName || 'socket-io';
     options.key = options.key || 'socket-io';
 
     if (typeof options.uri === 'string') {
         connxStr = options.uri;
+        options.key = mongodbUri.parse(uri).database || options.key;
     } else {
+        options.key = options.uri.database || options.key;
+        options.uri.database = options.uri.database || options.key;
         connxStr = (mongodbUri.format(options.uri));
     }
 
@@ -66,10 +67,12 @@ module.exports = function (uri, options) {
         mubsubCli = mubsub(connxStr, options.mubsubOptions);
     }
 
-    channel = mubsubCli.channel(options.channelName);
-
-    makeRoomName = function (adapter, roomName) {
-        return options.key + adapter.nsp.name + '-' + roomName;
+    makeRoomName = function (nsp, roomName) {
+        if (roomName) {
+            return options.key + nsp.name + '-' + roomName;
+        } else {
+            return options.key + (!nsp.name || nsp.name === '/' ? '' : nsp.name);
+        }
     };
 
     onChannelSubscriptionChange = function (err, adapter, callback) {
@@ -89,10 +92,12 @@ module.exports = function (uri, options) {
     // @param namespace (string): The namespace for this adapter
     */
     MongoAdapter = function (namespace) {
-        var self = this;
+        var self = this,
+            defaultRoomName = makeRoomName(namespace);
+        channel = mubsubCli.channel(defaultRoomName);
 
         Adapter.call(self, namespace);
-        channel.subscribe(serverId, self.onmessage.bind(self));
+        channel.subscribe(defaultRoomName, self.onmessage.bind(self));
     };
 
     /**
@@ -119,7 +124,7 @@ module.exports = function (uri, options) {
             return debug('the message is for a different namespace - ignoring');
         }
 
-        args.push(true);
+        args.push(true); // add remote=true to the args, so broadcast doesn't cause an infinite loop
         self.broadcast.apply(self, args);
     };
 
@@ -136,8 +141,29 @@ module.exports = function (uri, options) {
         Adapter.prototype.broadcast.call(self, packet, opts);
 
         if (!remote) {
-            channel.publish(options.key, { uid: serverId, data: msgpack.encode([packet, opts]) });
+            if (opts.rooms) {
+                opts.rooms.forEach(function (room) {
+                    channel.publish(makeRoomName(packet.nsp, room), { uid: serverId, data: msgpack.encode([packet, opts]) });
+                });
+            } else {
+                channel.publish(makeRoomName(packet.nsp), { uid: serverId, data: msgpack.encode([packet, opts]) });
+            }
         }
+
+        // Adapter.prototype.broadcast.call(this, packet, opts);
+        // if (!remote) {
+        //   var chn = prefix + '#' + packet.nsp + '#';
+        //   var msg = msgpack.encode([uid, packet, opts]);
+        //   if (opts.rooms) {
+        //     opts.rooms.forEach(function(room) {
+        //       var chnRoom = chn + room + '#';
+        //       pub.publish(chnRoom, msg);
+        //     });
+        //   } else {
+        //     pub.publish(chn, msg);
+        //   }
+        // }
+
     };
 
 
@@ -154,7 +180,7 @@ module.exports = function (uri, options) {
 
         debug('adding %s to %s ', clientId, roomName);
         Adapter.prototype.add.call(self, clientId, roomName);
-        namespacedRoomName = makeRoomName(self, roomName);
+        namespacedRoomName = makeRoomName(self.nsp, roomName);
 
         channel.subscribe(namespacedRoomName, function(err){
             onChannelSubscriptionChange(err, self, callback);
@@ -179,7 +205,7 @@ module.exports = function (uri, options) {
         Adapter.prototype.del.call(self, clientId, roomName);
 
         if (hasRoom && !self.rooms[roomName]) {
-          namespacedRoomName = makeRoomName(self, roomName);
+          namespacedRoomName = makeRoomName(self.nsp, roomName);
 
           channel.unsubscribe(namespacedRoomName, function(err){
               onChannelSubscriptionChange(err, self, callback);

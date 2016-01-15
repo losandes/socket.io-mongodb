@@ -33,13 +33,13 @@ module.exports = function (http, io, socketioClient, expect, mubsub, adapter) {
             });
         };
     }());
-        
+
     describe('socket.io-mongodb', function () {
         beforeEach(function (done) {
             var cli = mubsub(mongoConnxStr),
-                channel = cli.channel('socket-io');
+                channel = cli.channel('socket-io-tests');
 
-            channel.publish('socket-io', 'init', done);
+            channel.publish('socket-io-tests', 'init', done);
         });
 
         it('should broadcast', function (done) {
@@ -48,8 +48,10 @@ module.exports = function (http, io, socketioClient, expect, mubsub, adapter) {
             create(function (server1, client1) {
                 create(function (server2, client2) {
                     client1.on('woot', function(a, b){
-                        expect(a).to.eql([]);
-                        expect(b).to.eql({ a: 'b' });
+
+                        expect(Array.isArray(a)).to.equal(true);
+                        expect(a.length).to.equal(0);
+                        expect(b.a).to.equal('b');
                         done();
                     });
 
