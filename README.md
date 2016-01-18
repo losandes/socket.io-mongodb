@@ -44,7 +44,7 @@ The options described here can be passed in as the first argument, or as the sec
 ## Client error handling
 This adapter exposes the `pubsubClient` property (mubsub), as well as the `channel` that was created. You can listen for events on each of these resources:
 
-```
+```JavaScript
 var io = require('socket.io')(3000),
     mongoAdapter = require('socket.io-mongodb'),
     adapter = mongoAdapter('mongodb://localhost:27017/socket-io');
@@ -57,7 +57,7 @@ adapter.channel.on('error', console.error);
 ## Custom client
 You can inject your own pubsub client (i.e. if you already have an instance of mubsub you wish to use), using the `pubsubClient` property of the options.
 
-```
+```JavaScript
 var io = require('socket.io')(3000),
     mubsub = require('mubsub'),
     mongoAdapter = require('socket.io-mongodb'),
@@ -75,7 +75,7 @@ io.adapter(mongoAdapter({
 ## Existing DB connection
 You can inject an existing database connection, if you are _not_ injecting the `pubsubClient`.
 
-```
+```JavaScript
 var io = require('socket.io')(3000),
     MongoClient = require('mongodb').MongoClient,
     mongoAdapter = require('socket.io-mongodb'),
