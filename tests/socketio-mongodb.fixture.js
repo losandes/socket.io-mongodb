@@ -1,14 +1,27 @@
 var makeSocketIOServer,
-    mongoConnxStr = 'mongodb://localhost:27017/socket-io-tests';
+    nconf = require('nconf'),
+    env = nconf.env().argv().file('environment', './environment/env.json'),
+    mongoConnxStr = env.get('mongo-connx') || 'mongodb://localhost:27017/socket-io-tests';
 
-module.exports = function (http, io, socketioClient, expect, mubsub, adapter, async) {
+console.log('Connecting to:', mongoConnxStr);
+
+module.exports = function (http, io, socketioClient, expect, mubsub, mongoAdapter, async) {
     // Setup
     (function () {
         makeSocketIOServer = function (namespace, callback) {
             var server = http(),
                 sio = io(server);
 
-            sio.adapter(adapter(mongoConnxStr));
+            sio.adapter(mongoAdapter(mongoConnxStr, {
+                mubsubOptions: {
+                    server: {
+                        sslValidate: false
+                    },
+                    replSet: {
+                        sslValidate: false
+                    }
+                }
+            }));
 
             server.listen(function (err) {
                 var address,
@@ -35,7 +48,11 @@ module.exports = function (http, io, socketioClient, expect, mubsub, adapter, as
     }());
 
     describe('socket.io-mongodb', function () {
-        var serverTask = function (callback) {
+        var serverTask;
+
+        this.timeout(30000);
+
+        serverTask = function (callback) {
             makeSocketIOServer(function (server, client) {
                 callback(null, {
                     server: server,

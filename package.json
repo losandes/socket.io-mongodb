@@ -28,13 +28,15 @@
     "debug": "^2.2.0",
     "mongodb-uri": "^0.9.7",
     "mubsub": "^1.1.2",
+    "nconf": "^0.8.2",
     "socket.io-adapter": "^0.4.0",
     "uid2": "0.0.3"
   },
   "devDependencies": {
-      "chai": "^3.3.0",
-      "mocha": "^2.3.4",
-      "socket.io": "^1.4.4",
-      "socket.io-client": "^1.4.4"
+    "chai": "^3.3.0",
+    "mocha": "^2.3.4",
+    "nconf": "^0.8.2",
+    "socket.io": "^1.4.4",
+    "socket.io-client": "^1.4.4"
   }
 }
