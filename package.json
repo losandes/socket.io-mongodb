@@ -25,12 +25,9 @@
   "homepage": "https://github.com/losandes/socket.io-mongodb#readme",
   "dependencies": {
     "async": "^1.5.2",
-    "debug": "^2.2.0",
     "mongodb-uri": "^0.9.7",
     "mubsub": "^1.1.2",
-    "nconf": "^0.8.2",
-    "socket.io-adapter": "^0.4.0",
-    "uid2": "0.0.3"
+    "socket.io-adapter": "^0.4.0"
   },
   "devDependencies": {
     "chai": "^3.3.0",

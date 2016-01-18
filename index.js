@@ -1,14 +1,22 @@
-var uid2 = require('uid2'),
-    mubsub = require('mubsub'),
+var mubsub = require('mubsub'),
     Adapter = require('socket.io-adapter'),
-    debug = require('debug')('socket.io-mongodb'),
     mongodbUri = require('mongodb-uri'),
     async = require('async'),
     encodeMessage,
-    decodeMessage;
+    decodeMessage,
+    makeUid;
 
 encodeMessage = JSON.stringify;
 decodeMessage = JSON.parse;
+
+makeUid = function () {
+    templateString = 'xxxxxxxx';
+
+    return templateString.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : r & 3 | 8;
+        return v.toString(16);
+    });
+};
 
 //options blueprint
 // {
@@ -37,7 +45,7 @@ decodeMessage = JSON.parse;
 module.exports = function (uri, options) {
     var connxStr,
         mubsubCli,
-        serverId = uid2(6),
+        serverId = makeUid(),
         channel,
         MongoAdapter,
         makeChannelName,
@@ -105,7 +113,8 @@ module.exports = function (uri, options) {
         var self = this, packet, opts;
 
         if (msg.uid === serverId || !msg.uid) {
-            return debug('the message is from this server - ignoring');
+            // 'the message is from this server - ignoring'
+            return false;
         }
 
         packet = decodeMessage(msg.packet);
@@ -114,7 +123,8 @@ module.exports = function (uri, options) {
         packet.nsp = packet.nsp || '/';
 
         if (packet.nsp !== self.nsp.name) {
-            return debug('the message is for a different namespace - ignoring');
+            // 'the message is for a different namespace - ignoring'
+            return false;
         }
 
         // make sure to add remote=true to the args, so broadcast doesn't cause an infinite loop
@@ -156,7 +166,7 @@ module.exports = function (uri, options) {
         var self = this,
             channelName;
 
-        debug('adding %s to %s ', clientId, roomName);
+        //debug('adding %s to %s ', clientId, roomName);
         Adapter.prototype.add.call(self, clientId, roomName);
         channelName = makeChannelName(self.nsp.name, roomName);
 
@@ -175,8 +185,7 @@ module.exports = function (uri, options) {
             channelName,
             hasRoom;
 
-        debug('removing %s from %s', clientId, roomName);
-
+        //debug('removing %s from %s', clientId, roomName);
         hasRoom = self.rooms.hasOwnProperty(roomName);
         Adapter.prototype.del.call(self, clientId, roomName);
 
@@ -199,10 +208,11 @@ module.exports = function (uri, options) {
     */
     MongoAdapter.prototype.delAll = function (clientId, callback) {
         var self = this,
-            rooms = self.sids[clientId];
+            rooms = self.sids[clientId],
+            deleteRoom,
+            deleteSids;
 
-        debug('removing %s from all rooms', clientId);
-
+        //debug('removing %s from all rooms', clientId);
         if (!rooms) {
             if (typeof callback === 'function') {
                 process.nextTick(callback.bind(null, null));
