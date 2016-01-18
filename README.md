@@ -28,6 +28,19 @@ process, you should use [socket.io-emitter](https://github.com/socketio/socket.i
 ### adapter(uri[, opts])
 The first argument, `uri`, expects a MongoDB connection string (i.e. `mongodb://localhost:27017/socket-io`). The options argument is explained below.
 
+```JavaScript
+var io = require('socket.io')(3000),
+    mongoAdapter = require('socket.io-mongodb'),
+    adapter;
+
+adapter = mongoAdapter('mongodb://localhost:27017/socket-io', {
+    prefix: 'myprefix',
+    collectionName: 'mypubsub'
+});
+
+io.adapter(adapter);
+```
+
 ### adapter(opts)
 The options described here can be passed in as the first argument, or as the second argument, when the first argument is your MongoDB connection string.
 
@@ -37,6 +50,47 @@ The options described here can be passed in as the first argument, or as the sec
 * **mongoClient** (_optional_ instance of MongoDB node driver): the MongoDB driver to use. This is ignored if the `pubsubClient` is defined.
 * **pubsubClient** (_optional_ instance of mubsub): the mubsub client to use. This can be replaced by another library that implements the `channel`, `channel.subscribe`, and `channel.publish` interfaces.
 * **channel** (_optional_ mubsub channel): the mubsub channel to use. This is only respected if the `pubsubClient` is also defined.
+
+```JavaScript
+var io = require('socket.io')(3000),
+    mongoAdapter = require('socket.io-mongodb'),
+    adapter;
+
+adapter = mongoAdapter({
+    "uri": {
+        "hosts": [
+            {
+                "host": "db01.mysite.com",
+                "port": 27017
+            },
+            {
+                "host": "db02.mysite.com",
+                "port": 27017
+            }
+        ],
+        "username": "admin",
+        "password": "password",
+        "database": "socket-io",
+        "options": {
+            "authSource": "admin",
+            "replicaSet": "myreplset",
+            "ssl": true
+        }
+    },
+    "server": {
+        //"sslCA": [fs.readFileSync(__dirname + '/mySSLCA.pem')]
+        "sslValidate": false
+    },
+    "replSet": {
+        //"sslCA": [fs.readFileSync(__dirname + '/mySSLCA.pem')]
+        "sslValidate": false
+    }
+    "prefix": 'myprefix',
+    "collectionName": 'mypubsub'
+});
+
+io.adapter(adapter);
+```
 
 > The options that are described here are passed through to [mubsub](https://github.com/scttnlsn/mubsub), which in turn passes them to the [native MongoDB driver](https://github.com/mongodb/node-mongodb-native). So you can include options that are relevant to those libraries. Also, if you pass an object in as the `uri` property, it is processed by [mongodb-uri](https://github.com/mongolab/mongodb-uri-node).
 
