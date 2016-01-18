@@ -54,7 +54,7 @@ The options described here can be passed in as the first argument, or as the sec
 ```JavaScript
 var io = require('socket.io')(3000),
     mongoAdapter = require('socket.io-mongodb'),
-    adapter,
+    adapter;
     //fs = require('fs'),
     //sslCA = [fs.readFileSync(__dirname + '/mySSLCA.pem')]; // you may want to switch this to `readFile` so as not to block - it's just here for example
 
