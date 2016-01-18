@@ -18,30 +18,6 @@ makeUid = function () {
     });
 };
 
-//options blueprint
-// {
-//     uri: @string or @object
-    // { // uri object properties
-    //     username: 'usern@me',
-    //     password: 'p@ssword',
-    //     hosts: [
-    //         {
-    //             host: 'host',
-    //             port: 1234
-    //         }
-    //     ],
-    //     database: 'd@tabase',
-    //     options: {
-    //         authSource: '@dmin'
-    //     }
-    // }
-//      client: (mubsub client)
-//      mongodbDriver: (an existing native mongodb driver)
-//      prefix: (the prefix to be used when creating rooms)
-//      collectionName: (the name of the collection/mubsub channel )
-//      mubsubOptions: (mubsub passthru)
-//}
-
 module.exports = function (uri, options) {
     var connxStr,
         mubsubCli,
@@ -70,11 +46,11 @@ module.exports = function (uri, options) {
     }
 
     if (options.client) {
-        mubsubCli = options.client;
+        mubsubCli = options.mubsubClient;
     } else if (options.mongodbDriver) {
         mubsubCli = mubsub(options.mongodbDriver);
     } else {
-        mubsubCli = mubsub(connxStr, options.mubsubOptions);
+        mubsubCli = mubsub(connxStr, options);
     }
 
     channel = mubsubCli.channel(options.collectionName);

@@ -12,9 +12,9 @@
   },
   "keywords": [
     "socket.io",
-    "adapter",
     "mongo",
-    "mongodb",
+    "mongodb",    
+    "adapter",
     "backplane"
   ],
   "author": "Andy Wright <andes.collab@gmail.com> (https://github.com/losandes)",
