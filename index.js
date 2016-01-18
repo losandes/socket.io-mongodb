@@ -37,7 +37,7 @@ module.exports = function (uri, options) {
     }
 
     options.prefix = options.prefix || 'socket-io';
-    options.collectionName = options.collectionName || 'io';
+    options.collectionName = options.collectionName || 'pubsub';
 
     if (typeof options.uri === 'string') {
         connxStr = options.uri;
@@ -45,11 +45,11 @@ module.exports = function (uri, options) {
         connxStr = (mongodbUri.format(options.uri));
     }
 
-    if (options.client) {
+    if (options.pubsubClient) {
         pubsubCli = options.pubsubClient;
         channel = options.channel;
-    } else if (options.mongodbDriver) {
-        pubsubCli = mubsub(options.mongodbDriver);
+    } else if (options.mongoClient) {
+        pubsubCli = mubsub(options.mongoClient);
     } else {
         pubsubCli = mubsub(connxStr, options);
     }
@@ -80,8 +80,9 @@ module.exports = function (uri, options) {
         self.prefix = options.prefix;
         self.pubsubClient = pubsubCli;
         self.channel = channel;
+        self.db = pubsubCli.db;
 
-        channel.subscribe(makeChannelName(namespace.name), self.onmessage.bind(self));
+        self.channel.subscribe(makeChannelName(namespace.name), self.onmessage.bind(self));
     };
 
     /**
@@ -129,10 +130,10 @@ module.exports = function (uri, options) {
         if (!remote) {
             if (opts.rooms) {
                 opts.rooms.forEach(function (room) {
-                    channel.publish(makeChannelName(packet.nsp, room), { uid: serverId, packet: encodeMessage(packet), options: encodeMessage(opts) });
+                    self.channel.publish(makeChannelName(packet.nsp, room), { uid: serverId, packet: encodeMessage(packet), options: encodeMessage(opts) });
                 });
             } else {
-                channel.publish(makeChannelName(packet.nsp), { uid: serverId, packet: encodeMessage(packet), options: encodeMessage(opts) });
+                self.channel.publish(makeChannelName(packet.nsp), { uid: serverId, packet: encodeMessage(packet), options: encodeMessage(opts) });
             }
         }
     };
@@ -153,7 +154,7 @@ module.exports = function (uri, options) {
         Adapter.prototype.add.call(self, clientId, roomName);
         channelName = makeChannelName(self.nsp.name, roomName);
 
-        channels[channelName] = channel.subscribe(channelName, self.onmessage.bind(self));
+        channels[channelName] = self.channel.subscribe(channelName, self.onmessage.bind(self));
     };
 
     /**
@@ -218,6 +219,12 @@ module.exports = function (uri, options) {
             }
         );
     };
+
+    MongoAdapter.uid = serverId;
+    MongoAdapter.prefix = options.prefix;
+    MongoAdapter.pubsubClient = pubsubCli;
+    MongoAdapter.channel = channel;
+    MongoAdapter.db = pubsubCli.db;
 
     return MongoAdapter;
 };

@@ -1,47 +1,18 @@
-var makeSocketIOServer,
-    nconf = require('nconf'),
-    env = nconf.env().argv().file('environment', './environment/env.json'),
-    db = env.get('db') || {
-        connx: 'mongodb://localhost:27017/socket-io-tests',
-        options: null
-    };
+module.exports = function (db, makeServer, expect, mongoAdapter, async, next) {
+    var makeSocketIOServer;
 
-console.log('Connecting to:', db.connx || db.hosts);
-
-module.exports = function (http, io, socketioClient, expect, mubsub, mongoAdapter, async) {
     // Setup
     (function () {
         makeSocketIOServer = function (namespace, callback) {
-            var server = http(),
-                sio = io(server);
+            var adapter;
 
             if (db.connx) {
-                sio.adapter(mongoAdapter(db.connx, db.options));
+                adapter = mongoAdapter(db.connx, db.options);
             } else {
-                sio.adapter(mongoAdapter(db));
+                adapter = mongoAdapter(db);
             }
 
-            server.listen(function (err) {
-                var address,
-                    url;
-
-                if (err) {
-                    throw err;
-                }
-
-                if (typeof namespace === 'function') {
-                    callback = namespace;
-                    namespace = '/';
-                }
-
-                namespace = namespace || '/';
-                address = server.address();
-                url = 'http://localhost:' + address.port + namespace;
-
-                if (typeof callback === 'function') {
-                    callback(sio.of(namespace), socketioClient(url));
-                }
-            });
+            makeServer(adapter, namespace, callback);
         };
     }());
 
@@ -58,6 +29,10 @@ module.exports = function (http, io, socketioClient, expect, mubsub, mongoAdapte
                 });
             });
         };
+
+        after(function() {
+            next();
+        });        
 
         it('should broadcast on the default namespace', function (done) {
             async.parallel([serverTask, serverTask], function (err, results) {
@@ -136,13 +111,13 @@ module.exports = function (http, io, socketioClient, expect, mubsub, mongoAdapte
         it('should NOT broadcast to rooms that have been left', function (done) {
             async.parallel([serverTask, serverTask, serverTask], function (err, results) {
                 results[0].server.on('connection', function (client) {
-                    client.join('test');
-                    client.leave('test');
+                    client.join('leavetest');
+                    client.leave('leavetest');
                 });
 
                 results[1].server.on('connection', function (client) {
                     client.on('do broadcast', function () {
-                        client.broadcast.to('test').emit('broadcast', [], { d: 'd' });
+                        client.broadcast.to('leavetest').emit('broadcast', [], { d: 'd' });
 
                         setTimeout(function () {
                             results[0].client.disconnect();
@@ -166,7 +141,7 @@ module.exports = function (http, io, socketioClient, expect, mubsub, mongoAdapte
         it('should delete rooms upon disconnection', function () {
             async.parallel([serverTask], function (err, results) {
                 results[0].server.on('connection', function (client) {
-                    client.join('test');
+                    client.join('leavealltest');
                     client.on('disconnect', function () {
                         expect(client.adapter.sids[c.id]).to.be.empty();
                         expect(client.adapter.rooms).to.be.empty();
