@@ -8,4 +8,4 @@ var http = require('http').Server,
     adapter = require('../index.js'),
     fixture01 = require('./socketio-mongodb.fixture.js');
 
-fixture01(http, io, socketioClient, expect, mubsub, adapter, async, false);
+fixture01(http, io, socketioClient, expect, mubsub, adapter, async);

@@ -20,7 +20,7 @@ makeUid = function () {
 
 module.exports = function (uri, options) {
     var connxStr,
-        mubsubCli,
+        pubsubCli,
         serverId = makeUid(),
         channel,
         MongoAdapter,
@@ -46,14 +46,15 @@ module.exports = function (uri, options) {
     }
 
     if (options.client) {
-        mubsubCli = options.mubsubClient;
+        pubsubCli = options.pubsubClient;
+        channel = options.channel;
     } else if (options.mongodbDriver) {
-        mubsubCli = mubsub(options.mongodbDriver);
+        pubsubCli = mubsub(options.mongodbDriver);
     } else {
-        mubsubCli = mubsub(connxStr, options);
+        pubsubCli = mubsub(connxStr, options);
     }
 
-    channel = mubsubCli.channel(options.collectionName);
+    channel = channel || pubsubCli.channel(options.collectionName);
 
     makeChannelName = function (namespaceName, roomName) {
         var name = options.prefix + '::' + (!namespaceName || namespaceName === '/' ? '' : (namespaceName + '::'));
@@ -74,6 +75,12 @@ module.exports = function (uri, options) {
         var self = this;
 
         Adapter.call(self, namespace);
+
+        self.uid = serverId;
+        self.prefix = options.prefix;
+        self.pubsubClient = pubsubCli;
+        self.channel = channel;
+
         channel.subscribe(makeChannelName(namespace.name), self.onmessage.bind(self));
     };
 
