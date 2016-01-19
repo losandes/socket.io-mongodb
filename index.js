@@ -1,7 +1,6 @@
-var mubsub = require('mubsub'),
-    Adapter = require('socket.io-adapter'),
-    mongodbUri = require('mongodb-uri'),
+var Adapter = require('socket.io-adapter'),
     async = require('async'),
+    PubSubClient = require('./PubSubClient.js'),
     messageEncoder = require('./messageEncoder'),
     makeUid;
 
@@ -36,22 +35,9 @@ module.exports = function (uri, options) {
     options.collectionName = options.collectionName || 'pubsub';
     options.messageEncoder = options.messageEncoder || messageEncoder;
 
-    if (typeof options.uri === 'string') {
-        connxStr = options.uri;
-    } else {
-        connxStr = (mongodbUri.format(options.uri));
-    }
-
-    if (options.pubsubClient) {
-        pubsubCli = options.pubsubClient;
-        channel = options.channel;
-    } else if (options.mongoClient) {
-        pubsubCli = mubsub(options.mongoClient);
-    } else {
-        pubsubCli = mubsub(connxStr, options);
-    }
-
-    channel = channel || pubsubCli.channel(options.collectionName);
+    pubsubCli = new PubSubClient(options);
+    // only accept the channel if the pubsubClient was also defined
+    channel = (options.pubsubClient && options.channel) || pubsubCli.channel(options.collectionName);
 
     makeChannelName = function (namespaceName, roomName) {
         var name = options.prefix + '::' + (!namespaceName || namespaceName === '/' ? '' : (namespaceName + '::'));
