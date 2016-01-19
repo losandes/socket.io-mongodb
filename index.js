@@ -2,12 +2,8 @@ var mubsub = require('mubsub'),
     Adapter = require('socket.io-adapter'),
     mongodbUri = require('mongodb-uri'),
     async = require('async'),
-    encodeMessage,
-    decodeMessage,
+    messageEncoder = require('./messageEncoder'),
     makeUid;
-
-encodeMessage = JSON.stringify;
-decodeMessage = JSON.parse;
 
 makeUid = function () {
     templateString = 'xxxxxxxx';
@@ -38,6 +34,7 @@ module.exports = function (uri, options) {
 
     options.prefix = options.prefix || 'socket-io';
     options.collectionName = options.collectionName || 'pubsub';
+    options.messageEncoder = options.messageEncoder || messageEncoder;
 
     if (typeof options.uri === 'string') {
         connxStr = options.uri;
@@ -101,8 +98,8 @@ module.exports = function (uri, options) {
             return false;
         }
 
-        packet = decodeMessage(msg.packet);
-        opts = decodeMessage(msg.options);
+        packet = options.messageEncoder.decode(msg.packet);
+        opts = options.messageEncoder.decode(msg.options);
 
         packet.nsp = packet.nsp || '/';
 
@@ -130,10 +127,24 @@ module.exports = function (uri, options) {
         if (!remote) {
             if (opts.rooms) {
                 opts.rooms.forEach(function (room) {
-                    self.channel.publish(makeChannelName(packet.nsp, room), { uid: serverId, packet: encodeMessage(packet), options: encodeMessage(opts) });
+                    self.channel.publish(
+                        makeChannelName(packet.nsp, room),
+                        {
+                            uid: serverId,
+                            packet: options.messageEncoder.encode(packet),
+                            options: options.messageEncoder.encode(opts)
+                        }
+                    );
                 });
             } else {
-                self.channel.publish(makeChannelName(packet.nsp), { uid: serverId, packet: encodeMessage(packet), options: encodeMessage(opts) });
+                self.channel.publish(
+                    makeChannelName(packet.nsp),
+                    {
+                        uid: serverId,
+                        packet: options.messageEncoder.encode(packet),
+                        options: options.messageEncoder.encode(opts)
+                    }
+                );
             }
         }
     };

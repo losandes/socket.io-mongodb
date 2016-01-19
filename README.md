@@ -50,6 +50,7 @@ The options described here can be passed in as the first argument, or as the sec
 * **mongoClient** (_optional_ instance of MongoDB node driver): the MongoDB driver to use. This is ignored if the `pubsubClient` is defined.
 * **pubsubClient** (_optional_ instance of mubsub): the mubsub client to use. This can be replaced by another library that implements the `channel`, `channel.subscribe`, and `channel.publish` interfaces.
 * **channel** (_optional_ mubsub channel): the mubsub channel to use. This is only respected if the `pubsubClient` is also defined.
+* **messageEncoder** (_optional_ object): an object with `encode` and `decode` functions, to be used when encoding/decoding pubsub messages. The default uses `JSON.stringify` and `JSON.parse` to encode and decode, respectively.
 
 ```JavaScript
 var io = require('socket.io')(3000),
@@ -98,7 +99,7 @@ io.adapter(adapter);
 
 
 ## Client error handling
-This adapter exposes the `pubsubClient` property (mubsub), as well as the `channel` that was created. You can listen for events on each of these resources:
+This adapter exposes the `pubsubClient` property (mubsub), as well as the `channel` that was created. You can bind to events on each of these resources:
 
 ```JavaScript
 var io = require('socket.io')(3000),
@@ -109,6 +110,7 @@ io.adapter(adapter);
 adapter.pubsubClient.on('error', console.error);
 adapter.channel.on('error', console.error);
 ```
+
 
 ## Custom client
 You can inject your own pubsub client (i.e. if you already have an instance of mubsub you wish to use), using the `pubsubClient` property of the options.
@@ -142,6 +144,30 @@ MongoClient.connect('mongodb://localhost:27017/io-example', function(err, db) {
         mongoClient: db
     }));
 });
+```
+
+> The MongoClient is exposed as `db` on the adapter, so you can leverage it if you need to: `myAdapter.db`
+
+
+## Overriding the messageEncoder
+If you don't want or need to be able to read the message data in the database, you may benefit from overriding the messageEncoder. The following example uses `msgpack-js` to encode/decode the message data.
+
+```JavaScript
+var io = require('socket.io')(3000),
+    mongoAdapter = require('socket.io-mongodb'),
+    msgpack = require('msgpack-js');
+
+io.adapter(mongoAdapter({
+    uri: 'mongodb://localhost:27017/socket-io',
+    messageEncoder: {
+        encode: function (data) {
+            return msgpack.encode(data);
+        },
+        decode: function (data) {
+            return msgpack.decode(data.buffer);
+        }
+    }
+}));
 ```
 
 ## Protocol

@@ -12,6 +12,7 @@ var http = require('http'),
     fixture01 = require('./socketio-mongodb.fixture.js'),
     fixture02 = require('./mubsubCli.fixture.js'),
     fixture03 = require('./mongoCli.fixture.js'),
+    fixture04 = require('./messageEncoder.fixture.js'),
     db = env.get('db') || {
         connx: 'mongodb://localhost:27017/socket-io-tests',
         options: null
@@ -57,6 +58,9 @@ async.series([
         fixture03(MongoClient, makeServer, expect, mongoAdapter, async, callback);
     },
     function (callback) {
+        fixture04(makeServer, expect, mongoAdapter, async, callback);
+    },
+    function (callback) {
         fixture01(db, makeServer, expect, mongoAdapter, async, callback);
-    }    
+    }
 ], function () {});
