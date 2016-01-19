@@ -47,10 +47,10 @@ The options described here can be passed in as the first argument, or as the sec
 * **uri** (_required_ string or object): a MongoDB connection string, or a URI object that can be parsed by [mongodb-uri](https://github.com/mongolab/mongodb-uri-node)
 * **prefix** (_optional_ string): a prefix to be used when publishing events (default is _socket-io_)
 * **collectionName** (_optional_ string): the name of the MongoDB collection that mubsub should create/use (default is _pubsub_). This is ignored if the `mongoClient` or `pubsubClient` properties are defined.
-* **mongoClient** (_optional_ instance of MongoDB node driver): the MongoDB driver to use. This is ignored if the `pubsubClient` is defined.
-* **pubsubClient** (_optional_ instance of mubsub): the mubsub client to use. This can be replaced by another library that implements the `channel`, `channel.subscribe`, and `channel.publish` interfaces.
-* **channel** (_optional_ mubsub channel): the mubsub channel to use. This is only respected if the `pubsubClient` is also defined.
-* **messageEncoder** (_optional_ object): an object with `encode` and `decode` functions, to be used when encoding/decoding pubsub messages. The default uses `JSON.stringify` and `JSON.parse` to encode and decode, respectively.
+* **mongoClient** (_optional_ instance of MongoDB node driver): the MongoDB driver to use. This is ignored if the `pubsubClient` is defined. @alsoSee [Existing database connection](https://github.com/losandes/socket.io-mongodb#existing-database-connection)
+* **pubsubClient** (_optional_ instance of mubsub): the mubsub client to use. This can be replaced by another library that implements the `channel`, `channel.subscribe`, and `channel.publish` interfaces. @alsoSee [Custom client](https://github.com/losandes/socket.io-mongodb#custom-client)
+* **channel** (_optional_ mubsub channel): the mubsub channel to use. This is only respected if the `pubsubClient` is also defined. @alsoSee [Custom client](https://github.com/losandes/socket.io-mongodb#custom-client)
+* **messageEncoder** (_optional_ object): an object with `encode` and `decode` functions, to be used when encoding/decoding pubsub messages. The default uses `JSON.stringify` and `JSON.parse` to encode and decode, respectively. @alsoSee: [Overriding the messageEncoder](https://github.com/losandes/socket.io-mongodb#overriding-the-messageencoder)
 
 ```JavaScript
 var io = require('socket.io')(3000),
@@ -130,7 +130,7 @@ io.adapter(mongoAdapter({
 }));
 ```
 
-## Existing DB connection
+## Existing database connection
 You can inject an existing database connection, if you are _not_ injecting the `pubsubClient`.
 
 ```JavaScript
