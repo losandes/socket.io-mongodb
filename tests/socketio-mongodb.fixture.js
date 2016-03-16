@@ -126,8 +126,8 @@ module.exports = function (db, makeServer, expect, mongoAdapter, async, next) {
 
         }); // /it
 
-        xit('should broadcast to rooms on a specific namespace', function (done) {
-            async.parallel([makeServerTask('spns'), makeServerTask('spns'), makeServerTask('spns')], function (err, results) {
+        it('should broadcast to rooms on a specific namespace', function (done) {
+            async.parallel([makeServerTask('/spns'), makeServerTask('/spns'), makeServerTask('/spns')], function (err, results) {
                 broadcastToRoomsSpec(results, done);
             }); // /async
 
