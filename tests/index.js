@@ -1,3 +1,5 @@
+'use strict';
+
 var http = require('http'),
     io = require('socket.io'),
     socketioClient = require('socket.io-client'),

@@ -1,5 +1,9 @@
+/*globals describe, it, after*/
+'use strict';
+
 module.exports = function (mubsub, makeServer, expect, mongoAdapter, async, next) {
-    var channelName = 'mubsubclitest';
+    var channelName = 'mubsubclitest',
+        makeSocketIOServer;
 
     // Setup
     (function () {

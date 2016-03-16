@@ -1,6 +1,11 @@
+/*globals describe, it, after*/
+'use strict';
+
 var msgpack = require('msgpack-js');
 
 module.exports = function (makeServer, expect, mongoAdapter, async, next) {
+    var makeSocketIOServer;
+    
     // Setup
     (function () {
         makeSocketIOServer = function (namespace, callback) {

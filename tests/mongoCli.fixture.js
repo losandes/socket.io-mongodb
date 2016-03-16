@@ -1,4 +1,9 @@
+/*globals describe, it, after*/
+'use strict';
+
 module.exports = function (MongoClient, makeServer, expect, mongoAdapter, async, next) {
+    var makeSocketIOServer;
+    
     // Setup
     (function () {
         makeSocketIOServer = function (namespace, callback) {
@@ -26,7 +31,7 @@ module.exports = function (MongoClient, makeServer, expect, mongoAdapter, async,
 
         after(function() {
             next();
-        });        
+        });
 
         serverTask = function (callback) {
             makeSocketIOServer('/mongo', function (server, client, adapter) {
