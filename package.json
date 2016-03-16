@@ -1,6 +1,6 @@
 {
   "name": "socket.io-mongodb",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A MongoDB Adapter for socket.io",
   "main": "index.js",
   "scripts": {
