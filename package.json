@@ -32,7 +32,7 @@
   "devDependencies": {
     "chai": "^3.3.0",
     "mocha": "^2.3.4",
-    "mongodb": "^2.1.4",
+    "mongodb": "^3.6.1",
     "msgpack-js": "^0.3.0",
     "nconf": "^0.8.2",
     "socket.io": "^1.4.4",
